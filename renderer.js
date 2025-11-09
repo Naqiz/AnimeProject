@@ -152,14 +152,36 @@ function displayList() {
       <hr>
       <label>Episodes Watched:</label>
       <input type="number" min="0" max="${anime.episodes || 0}" value="${anime.episodesWatched}" onchange="updateEpisodes(${index}, this.value)">
+
       <label>Review:</label>
-      <textarea rows="3" onchange="updateReview(${index}, this.value)">${anime.review}</textarea>
+      <textarea id="review-${index}" rows="3">${anime.review}</textarea>
       <br>
-      <button onclick="deleteAnime(${index})">Delete</button>
+      <button onclick="submitReview(${index})">Submit Review</button>
+      <button onclick="deleteReview(${index})">Delete Review</button>
+      <br><br>
+      <button onclick="deleteAnime(${index})">Delete Anime</button>
     `;
+
     watchlistEl.appendChild(card);
   });
 }
+// --- Submit/Edit Review ---
+function submitReview(index) {
+  let list = JSON.parse(localStorage.getItem('watchlist')) || [];
+  const reviewText = document.getElementById(`review-${index}`).value.trim();
+  list[index].review = reviewText;
+  localStorage.setItem('watchlist', JSON.stringify(list));
+  alert('Review saved!');
+}
+
+// --- Delete Review ---
+function deleteReview(index) {
+  let list = JSON.parse(localStorage.getItem('watchlist')) || [];
+  list[index].review = '';
+  localStorage.setItem('watchlist', JSON.stringify(list));
+  displayList(); // refresh to clear textarea
+}
+
 
 // --- Update Episodes Watched ---
 function updateEpisodes(index, value) {
