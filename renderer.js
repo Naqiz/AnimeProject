@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('animeSearch');
   const animeResults = document.getElementById('animeResults');
 
-  // --- Search Page ---
+  //Search Page
   if (searchBtn) {
     searchBtn.addEventListener('click', async () => {
       const query = searchInput.value.trim();
@@ -34,7 +34,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Watchlist Page ---
+  //Watchlist Page
   const watchlistEl = document.getElementById('watchlist');
   if (watchlistEl) displayList();
 });
@@ -87,7 +87,7 @@ function showAnimeDetails(index) {
 }
 
 
-// --- Go back to results ---
+//Go back to results
 function goBackToResults() {
   const animeResults = document.getElementById('animeResults');
   animeResults.innerHTML = '';
@@ -106,7 +106,7 @@ function goBackToResults() {
   });
 }
 
-// --- Add to Watchlist by index from searchResults ---
+//Add to Watchlist by index from searchResults
 function addToWatchlistById(index) {
   const anime = searchResults[index];
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
@@ -122,7 +122,7 @@ function addToWatchlistById(index) {
   }
 }
 
-// --- Display Watchlist ---
+//Display Watchlist
 function displayList() {
   const watchlistEl = document.getElementById('watchlist');
   const list = JSON.parse(localStorage.getItem('watchlist')) || [];
@@ -165,7 +165,7 @@ function displayList() {
     watchlistEl.appendChild(card);
   });
 }
-// --- Submit/Edit Review ---
+//Submit/Edit Review
 function submitReview(index) {
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   const reviewText = document.getElementById(`review-${index}`).value.trim();
@@ -174,7 +174,7 @@ function submitReview(index) {
   alert('Review saved!');
 }
 
-// --- Delete Review ---
+//Delete Review
 function deleteReview(index) {
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   list[index].review = '';
@@ -183,19 +183,19 @@ function deleteReview(index) {
 }
 
 
-// --- Update Episodes Watched ---
+// Update Episodes Watched
 function updateEpisodes(index, value) {
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   list[index].episodesWatched = Number(value);
   localStorage.setItem('watchlist', JSON.stringify(list));
 }
 
-// --- Update Review ---
-function updateReview(index, value) {
-  let list = JSON.parse(localStorage.getItem('watchlist')) || [];
-  list[index].review = value;
-  localStorage.setItem('watchlist', JSON.stringify(list));
-}
+// //Update Review
+// function updateReview(index, value) {
+//   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
+//   list[index].review = value;
+//   localStorage.setItem('watchlist', JSON.stringify(list));
+// }
 
 // --- Delete Anime ---
 function deleteAnime(index) {
