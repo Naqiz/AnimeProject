@@ -13,7 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const query = searchInput.value.trim();
       if (!query) return alert('Please enter an anime name!');
 
-      // Fetch using the method you learned
+      // Fetch Api
       fetch(`https://api.jikan.moe/v4/anime?q=${query}`)
         .then(response => response.json())
         .then(data => {
