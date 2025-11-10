@@ -9,33 +9,33 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Search Page Functionality
   if (searchBtn) {
-    searchBtn.addEventListener('click', async () => {
+    searchBtn.addEventListener('click', () => {
       const query = searchInput.value.trim();
       if (!query) return alert('Please enter an anime name!');
 
-      try {
-        const response = await fetch(`https://api.jikan.moe/v4/anime?q=${query}`);
-        const data = await response.json();
-        animeResults.innerHTML = '';
+      // Fetch using the method you learned
+      fetch(`https://api.jikan.moe/v4/anime?q=${query}`)
+        .then(response => response.json())
+        .then(data => {
+          animeResults.innerHTML = '';
+          searchResults = data.data.slice(0, 24); // Store top 24 results
 
-        searchResults = data.data.slice(0, 24); // Store top 24 search results
-
-        searchResults.forEach((anime, i) => {
-          const card = document.createElement('div');
-          card.classList.add('animeCard');
-
-          card.innerHTML = `
-            <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
-            <h2>${anime.title}</h2>
-            <button onclick="showAnimeDetails(${i})">View Anime</button>
-            <p><b>Score:</b> ${anime.score || 'N/A'}</p>
-          `;
-          animeResults.appendChild(card);
+          searchResults.forEach((anime, i) => {
+            const card = document.createElement('div');
+            card.classList.add('animeCard');
+            card.innerHTML = `
+              <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+              <h2>${anime.title}</h2>
+              <button onclick="showAnimeDetails(${i})">View Anime</button>
+              <p><b>Score:</b> ${anime.score || 'N/A'}</p>
+            `;
+            animeResults.appendChild(card);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching anime:', error);
+          alert('Failed to fetch anime data. Please try again later.');
         });
-      } catch (error) {
-        console.error('Error fetching anime:', error);
-        alert('Failed to fetch anime data. Please try again later.');
-      }
     });
   }
 
