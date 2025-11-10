@@ -5,40 +5,45 @@ window.addEventListener('DOMContentLoaded', () => {
   const searchBtn = document.getElementById('searchBtn');
   const searchInput = document.getElementById('animeSearch');
   const animeResults = document.getElementById('animeResults');
+  const watchlistEl = document.getElementById('watchlist');
 
-  //Search Page
+  // Search Page Functionality
   if (searchBtn) {
     searchBtn.addEventListener('click', async () => {
       const query = searchInput.value.trim();
       if (!query) return alert('Please enter an anime name!');
 
-      const response = await fetch(`https://api.jikan.moe/v4/anime?q=${query}`);
-      const data = await response.json();
-      animeResults.innerHTML = '';
+      try {
+        const response = await fetch(`https://api.jikan.moe/v4/anime?q=${query}`);
+        const data = await response.json();
+        animeResults.innerHTML = '';
 
-      searchResults = data.data.slice(0, 24); // store results
+        searchResults = data.data.slice(0, 24); // Store top 24 search results
 
-      searchResults.forEach((anime, i) => {
-        const card = document.createElement('div');
-        card.classList.add('animeCard');
+        searchResults.forEach((anime, i) => {
+          const card = document.createElement('div');
+          card.classList.add('animeCard');
 
-        // --- Updated: Added rating under View Anime button ---
-        card.innerHTML = `
-          <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
-          <h2>${anime.title}</h2>
-          <button onclick="showAnimeDetails(${i})">View Anime</button>
-          <p><b>Score:</b> ${anime.score || 'N/A'}</p>
-        `;
-        animeResults.appendChild(card);
-      });
+          card.innerHTML = `
+            <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+            <h2>${anime.title}</h2>
+            <button onclick="showAnimeDetails(${i})">View Anime</button>
+            <p><b>Score:</b> ${anime.score || 'N/A'}</p>
+          `;
+          animeResults.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error fetching anime:', error);
+        alert('Failed to fetch anime data. Please try again later.');
+      }
     });
   }
 
-  //Watchlist Page
-  const watchlistEl = document.getElementById('watchlist');
+  // Watchlist Page Functionality
   if (watchlistEl) displayList();
 });
 
+// Show Anime Details
 function showAnimeDetails(index) {
   const anime = searchResults[index];
   const animeResults = document.getElementById('animeResults');
@@ -48,12 +53,10 @@ function showAnimeDetails(index) {
 
   animeResults.innerHTML = `
     <div class="animeDetailsContainer">
-      <!-- Left Column: Image -->
       <div class="animeImageSection">
         <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
       </div>
 
-      <!-- Center Column: Details -->
       <div class="animeInfoSection">
         <h2>${anime.title}</h2>
         <p><b>Score:</b> ${anime.score || 'N/A'}</p>
@@ -67,18 +70,16 @@ function showAnimeDetails(index) {
         <p><b>Episodes:</b> ${anime.episodes || 'N/A'}</p>
         <p><b>Aired:</b> ${anime.aired.string || 'N/A'}</p>
 
-        <!-- Synopsis -->
         <div class="animeSynopsis">
           <h3>Synopsis</h3>
           <p>${anime.synopsis || 'No synopsis available.'}</p>
         </div>
 
-        <!-- Buttons -->
         <div class="animeButtons">
           <a href="https://myanimelist.net/anime/${anime.mal_id}" target="_blank">
             <button>View Anime List</button>
           </a>
-          <button onclick="addToWatchlistById(${index})">Add to Wishlist</button>
+          <button onclick="addToWatchlistById(${index})">Add to Watchlist</button>
           <button onclick="goBackToResults()">Back to Results</button>
         </div>
       </div>
@@ -86,31 +87,29 @@ function showAnimeDetails(index) {
   `;
 }
 
-
-//Go back to results
+// Go Back to Results
 function goBackToResults() {
   const animeResults = document.getElementById('animeResults');
   animeResults.innerHTML = '';
   searchResults.forEach((anime, i) => {
     const card = document.createElement('div');
     card.classList.add('animeCard');
-
-    // --- Updated: Added rating under View Anime button ---
     card.innerHTML = `
       <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
       <h2>${anime.title}</h2>
       <button onclick="showAnimeDetails(${i})">View Anime</button>
-      <p><b>Rating:</b> ${anime.rating || 'N/A'}</p>
+      <p><b>Score:</b> ${anime.score || 'N/A'}</p>
     `;
     animeResults.appendChild(card);
   });
 }
 
-//Add to Watchlist by index from searchResults
+// Add to Watchlist
 function addToWatchlistById(index) {
   const anime = searchResults[index];
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   const exists = list.some(item => item.mal_id === anime.mal_id);
+
   if (!exists) {
     anime.episodesWatched = 0;
     anime.review = '';
@@ -122,19 +121,23 @@ function addToWatchlistById(index) {
   }
 }
 
-//Display Watchlist
+// Display Watchlist
 function displayList() {
   const watchlistEl = document.getElementById('watchlist');
   const list = JSON.parse(localStorage.getItem('watchlist')) || [];
   watchlistEl.innerHTML = '';
 
-  list.forEach((anime, index) => {
-    const card = document.createElement('div');
-    card.classList.add('animeCard');
+  if (list.length === 0) {
+    watchlistEl.innerHTML = '<p>No anime in your watchlist yet.</p>';
+    return;
+  }
 
+  list.forEach((anime, index) => {
     const genres = anime.genres.map(g => g.name).join(', ');
     const producers = anime.producers.map(p => p.name).join(', ');
 
+    const card = document.createElement('div');
+    card.classList.add('animeCard');
     card.innerHTML = `
       <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
       <h2>${anime.title}</h2>
@@ -161,11 +164,11 @@ function displayList() {
       <br><br>
       <button onclick="deleteAnime(${index})">Delete Anime</button>
     `;
-
     watchlistEl.appendChild(card);
   });
 }
-//Submit/Edit Review
+
+// Submit Review
 function submitReview(index) {
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   const reviewText = document.getElementById(`review-${index}`).value.trim();
@@ -174,14 +177,13 @@ function submitReview(index) {
   alert('Review saved!');
 }
 
-//Delete Review
+// Delete Review
 function deleteReview(index) {
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   list[index].review = '';
   localStorage.setItem('watchlist', JSON.stringify(list));
-  displayList(); // refresh to clear textarea
+  displayList();
 }
-
 
 // Update Episodes Watched
 function updateEpisodes(index, value) {
@@ -190,14 +192,7 @@ function updateEpisodes(index, value) {
   localStorage.setItem('watchlist', JSON.stringify(list));
 }
 
-// //Update Review
-// function updateReview(index, value) {
-//   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
-//   list[index].review = value;
-//   localStorage.setItem('watchlist', JSON.stringify(list));
-// }
-
-// --- Delete Anime ---
+// Delete Anime
 function deleteAnime(index) {
   let list = JSON.parse(localStorage.getItem('watchlist')) || [];
   list.splice(index, 1);
@@ -205,7 +200,7 @@ function deleteAnime(index) {
   displayList();
 }
 
-// --- Clear All ---
+// Clear All Watchlist
 function clearList() {
   localStorage.removeItem('watchlist');
   displayList();
